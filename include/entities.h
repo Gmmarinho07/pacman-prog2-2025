@@ -2,49 +2,56 @@
 #define ENTITIES_H
 
 #include "raylib.h"
+#include "map.h"
+#include <stdbool.h>
+
+typedef enum {
+    DIR_RIGHT = 0,
+    DIR_DOWN = 1,
+    DIR_LEFT = 2,
+    DIR_UP = 3
+
+} Direction;  // Direções possíveis
 
 typedef struct {
     int row;
     int col;
-    Vector2 position;
-    int direction; // 0: direita, 1:baixo, 2: Esquerda, 3: Cima
-    int nextDirection;
+    Directio direction;
+    Direcition nextDirection;  // Próxima direção desejada
     bool moving;
-
-}Position;
+} Position;
 
 typedef struct {
     Position pos;
     int lives;
     bool alive;
-
-}Pacman;
+    int score;
+} Pacman;
 
 typedef enum {
     SCATTER,
     CHASE,
-    FRIGHTENED
+    FRIGHTENED,
 
-}GhostMode;
+} GhostMode;
 
 typedef struct {
-    Posisiton pos;
-    GhostMoode mode;
-    Color color;
-    bool alive;
-    float speed;
-    float frightenedTimer;
+    Position pos;
+    GhostMode mode;
+    Color color; // Cores dos fantasmas
+    float speed; // Velocidade do fantasma
+    float frightenedTimer; // Tempo do modo assustado
+} Ghost;
 
-}Ghost;
-
-//Funções dos personagens
-
-void InitPacman(Pacman *pacman, intstarRow, int startCol);
-void UpdatePacman(Pacman *pacman, Map *map);
+// Funções do Pacman
+void InitPacman(Pacman *pacman, int startRow, int startol);
+void UpdatePacman(Pacman *pacaman, Map *manp);
 void MovePacman(Pacman *pacman, Map *map);
 
-void InitGhost(Ghost *ghost, int starRow, int startCol, Color color);
-void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman);
-void MoveGhost(Ghost *ghost, Map *map);
+// Funções dos fantasmas
+voi InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
+void UpdadeGhost(Ghost *ghost, Map *map, Pacman *pacman);
+void MoveGhost(ghost *ghost, Map *map);
 
 #endif
+

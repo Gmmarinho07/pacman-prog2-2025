@@ -1,16 +1,10 @@
-#ifnfdef GAME.H
-#define GAME.H
+#ifndef GAME_H
+#define GAME_H
 
-#include <raylib.h>
-#include "mp.h"
+#include "raylib.h"
+#include "map.h"
 #include "entities.h"
-
-
-#define SCREEN_WIDTH 1600
-#define SCREN_HEIGHT 840
-#define BLOCK_SIZE 40
-#define MAP_ROWS 20
-#define MAP_COLS 40
+#include <stdbool.h>
 
 typedef enum {
     MENU_MAIN,
@@ -18,29 +12,36 @@ typedef enum {
     GAME_ACTIVE,
     GAME_OVER
 
-}GameScreen;
+} GameScreen;  // Telas do jogo
 
-typedefstruct {
-    GameScreen currenntScreen;
-    Map map;
+typedef struct {
+    GameScreen curreentScreen;
+
+    Map *map;
     Pacman pacman;
-    Ghost *ghosts;
-    int ghostCount;
+
+    Ghost *ghost;
+    int ghostCount; // Número de fantasmas
+
     int score;
-    int lives;
     int level;
-    int palletsRemaining;
+    int pelletRemaining;
+
     bool powerMode;
+
+    float powerMode;
     float powerTimer;
-    Camera2D camera;
-}GemState;
 
-//Funções principais
+    Camera2D camera; // Câmera do jogo
 
-bool InitGame(GameState *game);
-void UpdaeGame(GameState * game);
-void RenderGame(GameState *game);
-void CleanupGame(GameState *game);
+} GameState;
+
+
+// Funções princiapais do jogo
+
+bool InitGame(GameState *game, const char *mapFile);
+void UpdateGame(GameState *game, float dt);
+void RenderGame(const GameState *game); // Renderiza o jogo
+void CleanupGame(GameState *game); // Limpa os recursos do jogo
 
 #endif
-

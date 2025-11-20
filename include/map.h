@@ -1,35 +1,43 @@
-#ifdef MAP_H
+#ifndef MAP_H
 #define MAP_H
 
-include <stdbool.h>
+#include <stdbool.h>
 
 typedef enum {
-    EMPTY = ' ',
-    WALL = '#',
+    EMPTY  = ' ',
+    WALL   = '#',
     PELLET = '.',
     POWER_PELLET = 'o',
     PACMAN_START = 'p',
-    GHOST = 'F',
-    PORTAL = 'T'
+    GHOST_START  = 'F',
+    PORTAL   = 'T',
 
-}TileType;
+} TileType;
 
 typedef struct {
     int rows;
     int cols;
-    char **tiles;
+    TileType *tiles;
     int pelletCount;
     int powerPelletCount;
+} Map;
 
-}Map;
+#define MAP_ROWS 20
+#define MAP_COLS 40
 
-//Funções do Mapa
+//Funções do mapa
 
 bool LoadMap(Map *map, const char *filename);
 void FreeMap(Map *map);
-TileType GetTile(const Map *map, int row, int col);
-void SetTile(Map * map, int row, int col, TileType);
-bool IsWalkable(tileType tile);
 
+
+TileType GetTile(const Map *map, int row, int col);
+void SetTile(Map *map, int row, int col, TileType tile);
+
+bool ISWalkable(TileType tile);
+void FindOtherPortal(const Map *map, int row, int col, int *outRow, int *outCol);
 
 #endif
+
+
+
