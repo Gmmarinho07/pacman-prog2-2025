@@ -16,8 +16,8 @@ typedef enum {
 typedef struct {
     int row;
     int col;
-    Directio direction;
-    Direcition nextDirection;  // Próxima direção desejada
+    Direction direction;
+    Direction nextDirection;  // Próxima direção desejada
     bool moving;
 } Position;
 
@@ -49,9 +49,9 @@ void UpdatePacman(Pacman *pacaman, Map *manp);
 void MovePacman(Pacman *pacman, Map *map);
 
 // Funções dos fantasmas
-voi InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
+void InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
 void UpdadeGhost(Ghost *ghost, Map *map, Pacman *pacman);
-void MoveGhost(ghost *ghost, Map *map);
+void MoveGhost(Ghost *ghost, Map *map);
 
 #endif
 
