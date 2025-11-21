@@ -46,6 +46,33 @@ void FreeMap(Map *map) {
 
 TileType GetTile(const Map *map, int row, int col) {
     if (!map) return WALL;
-    if (row < 0 || col < 0 || row >= map->rows || col >= map->cols) return WALL;  //  
+    if (row < 0 || col < 0 || row >= map->rows || col >= map->cols) return WALL;  // Fora dos limites  
+    return map->tiles[row * map->cols + col];
+}
 
+void SetTile( Map *map, int row, int col, TileType tile) {
+    if (!map) return;
+    if (row < 0 || col < 0 || row >= map-> rows || col >= map->cols) return;  // Fora dos limites
+    map->tiles[row * map->cols + col] = tile; // Define o tile ou modifica o contador se necessário
+    
+}
+
+bool IsWalkable(TileType tile) {
+    return tile == EMPTY || tile ==PELLET || tile == POWER_PELLET || tile == PORTAL || tile == PACMAN_START; // Tiles que Pacman pode atravessar
+
+}
+
+// Encontrar outro portal no mapa
+
+void FindOtherPortal(const Map *map, int row, int col, int *outRow, int *outCol) {
+    *outRow = -1; *outCol = -1; // Inicializa como não encontrado
+    for (int r = 0; r < map-> rows; r++) {
+        for(int c = 0; c  < map->cols; c++) {
+            if ( r == row && c == col) continue; // Pula o portal atual
+            if(GetTile( map, r, c) == PORTAL) {
+                *outRow = r; *outCol = c;
+                return;
+            }
+        }
+    }
 }

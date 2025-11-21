@@ -39,6 +39,7 @@ typedef struct {
     Position pos;
     GhostMode mode;
     Color color; // Cores dos fantasmas
+    bool alive;
     float speed; // Velocidade do fantasma
     float frightenedTimer; // Tempo do modo assustado
 } Ghost;
