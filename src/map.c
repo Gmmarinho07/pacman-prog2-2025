@@ -37,3 +37,15 @@ fclose(f);
 return true;
 }
 
+void FreeMap(Map *map) {
+    if(!map) return;
+    if(map->tiles) free(map->tiles);
+    map->tiles = NULL;
+
+}
+
+TileType GetTile(const Map *map, int row, int col) {
+    if (!map) return WALL;
+    if (row < 0 || col < 0 || row >= map->rows || col >= map->cols) return WALL;  //  
+
+}
