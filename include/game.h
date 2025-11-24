@@ -6,6 +6,15 @@
 #include "entities.h"
 #include <stdbool.h>
 
+//Dimensões da tela
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 840
+
+// Tamanho dos tiles
+#define BLOCK_SIZE 40
+
+
+
 typedef enum {
     MENU_MAIN,
     MENU_PAUSE,
@@ -20,12 +29,12 @@ typedef struct {
     Map *map;
     Pacman pacman;
 
-    Ghost *ghost;
+    Ghost *ghosts;
     int ghostCount; // Número de fantasmas
 
     int score;
     int level;
-    int pelletRemaining;
+    int pelletsRemaining;
 
     bool powerMode;
 

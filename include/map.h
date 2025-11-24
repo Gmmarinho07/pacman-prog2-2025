@@ -34,7 +34,7 @@ void FreeMap(Map *map);
 TileType GetTile(const Map *map, int row, int col);
 void SetTile(Map *map, int row, int col, TileType tile);
 
-bool ISWalkable(TileType tile);
+bool IsWalkable(TileType tile);
 void FindOtherPortal(const Map *map, int row, int col, int *outRow, int *outCol);
 
 #endif
