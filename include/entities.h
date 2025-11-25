@@ -45,13 +45,13 @@ typedef struct {
 } Ghost;
 
 // Funções do Pacman
-void InitPacman(Pacman *pacman, int startRow, int startol);
-void UpdatePacman(Pacman *pacaman, Map *manp);
+void InitPacman(Pacman *pacman, int startRow, int startCol);
+void UpdatePacman(Pacman *pacman, Map *map);
 void MovePacman(Pacman *pacman, Map *map);
 
 // Funções dos fantasmas
 void InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
-void UpdadeGhost(Ghost *ghost, Map *map, Pacman *pacman);
+void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman);
 void MoveGhost(Ghost *ghost, Map *map);
 
 #endif

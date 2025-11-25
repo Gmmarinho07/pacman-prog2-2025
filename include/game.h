@@ -12,7 +12,7 @@
 
 // Tamanho dos tiles
 #define BLOCK_SIZE 40
-
+#define HUD_HEIGHT 40
 
 
 typedef enum {
@@ -20,11 +20,10 @@ typedef enum {
     MENU_PAUSE,
     GAME_ACTIVE,
     GAME_OVER
-
 } GameScreen;  // Telas do jogo
 
 typedef struct {
-    GameScreen curreentScreen;
+    GameScreen currentScreen;
 
     Map *map;
     Pacman pacman;
@@ -37,8 +36,6 @@ typedef struct {
     int pelletsRemaining;
 
     bool powerMode;
-
-    float powerMode;
     float powerTimer;
 
     Camera2D camera; // Câmera do jogo
@@ -50,7 +47,7 @@ typedef struct {
 
 bool InitGame(GameState *game, const char *mapFile);
 void UpdateGame(GameState *game, float dt);
-void RenderGame(const GameState *game); // Renderiza o jogo
+void RenderGame(GameState *game); // Renderiza o jogo
 void CleanupGame(GameState *game); // Limpa os recursos do jogo
 
 #endif

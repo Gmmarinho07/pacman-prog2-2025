@@ -117,7 +117,7 @@ void MoveGhost(Ghost *ghost, Map *map) {
     // Verifica se o fantasma pode se mover na direção atual, se não escolhe um pellet aleatório
     int fowardR = r + dr[ghost->pos.direction];
     int fowardC = c + dc[ghost->pos.direction];
-    if (IsWalakable(GetTile(map, fowardR, fowardC))) {
+    if (IsWalkable(GetTile(map, fowardR, fowardC))) {
         ghost->pos.row = fowardR;
         ghost->pos.col = fowardC;
         return; // Conseguiu se mover
