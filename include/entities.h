@@ -51,7 +51,7 @@ void MovePacman(Pacman *pacman, Map *map);
 
 // Funções dos fantasmas
 void InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
-void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman);
+void UpdateGhost(Ghost *ghost, Map *map /*Pacman *pacman*/);
 void MoveGhost(Ghost *ghost, Map *map);
 
 #endif

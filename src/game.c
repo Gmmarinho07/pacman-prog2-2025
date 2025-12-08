@@ -8,49 +8,54 @@
 #define HUD_HEIGHT 40
 
 bool InitGame(GameState *game, const char *mapFile) {
-   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT,"Pac-Man - Prog2");
-   SetTargetFPS(60);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pac-Man - Prog2");
+    SetTargetFPS(60);
 
-   game->map = malloc(sizeof(Map));
-   if(!LoadMap(game->map, mapFile)) { // Carrega o mapa
-         printf("Erro ao carregar o mapa: %s\n", mapFile); //Mensagem de erro caso não carregue o mapa
-         return false;
-   }
-   //Inicialização da camera
-   game->camera.target = (Vector2){SCREEN_WIDTH /2.0f, SCREEN_HEIGHT / 2.0f};
-   game->camera.offset = (Vector2) {0,0};
-   game->camera.rotation = 0;
-   game->camera.zoom = 1.0f;
+    game->map = malloc(sizeof(Map));
+    if (!game->map) {
+        return false;
+    }
 
-   //Encontrar o Pacmana e os Fantasmas no mapa
+    if (!LoadMap(game->map, mapFile)) {
+        printf("Erro ao carregar o mapa: %s\n", mapFile);
+        return false;
+    }
 
-   game->ghostCount = 0;
-   game->ghosts = NULL;
-   game->score = 0;
-   game->level = 1;
-   game->powerMode = false;
-   game->powerTimer= 0.0f;
-   game->pelletsRemaining = game->map->pelletCount + game->map->powerPelletCount;
+    // Inicialização da câmera
+    game->camera.target = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+    game->camera.offset = (Vector2){ 0.0f, 0.0f };
+    game->camera.rotation = 0.0f;
+    game->camera.zoom = 1.0f;
 
-   for(int r = 0; r < game->map->rows; r++) {
-        for( int c = 0; c < game->map->cols; c++) {
+    game->currentScreen = GAME_ACTIVE;
+
+    game->ghostCount = 0;
+    game->ghosts = NULL;
+    game->score = 0;
+    game->level = 1;
+    game->powerMode = false;
+    game->powerTimer = 0.0f;
+    game->pelletsRemaining = game->map->pelletCount + game->map->powerPelletCount;
+
+    // Procura Pacman e Fantasmas no mapa
+    for (int r = 0; r < game->map->rows; r++) {
+        for (int c = 0; c < game->map->cols; c++) {
             TileType t = GetTile(game->map, r, c);
+
             if (t == PACMAN_START) {
                 InitPacman(&game->pacman, r, c);
-                SetTile(game->map, r, c, EMPTY); // Limpa a posição inicial
-            } else if(t == GHOST_START) {
-                game->ghostCount ++;
+                SetTile(game->map, r, c, EMPTY);
+            } else if (t == GHOST_START) {
+                game->ghostCount++;
                 game->ghosts = realloc(game->ghosts, sizeof(Ghost) * game->ghostCount);
-                InitGhost(&game->ghosts[game->ghostCount - 1], r, c, RED); // Inicializa o fantasma
-                SetTile(game->map, r, c, EMPTY); // Limpa a posição inicial
-
-            }
-
-
+                InitGhost(&game->ghosts[game->ghostCount - 1], r, c, RED);
+                SetTile(game->map, r, c, EMPTY);
             }
         }
-        return true;
-   }
+    }
+
+    return true;
+}
 
 void UpdateGame(GameState *game, float dt) {
     // Atualiza o Pacman
@@ -58,7 +63,7 @@ void UpdateGame(GameState *game, float dt) {
 
     // Atualiza os fantasmas
     for( int i = 0; i < game->ghostCount; i++) {
-        UpdateGhost(&game->ghosts[i], game->map, &game->pacman);
+        UpdateGhost(&game->ghosts[i], game->map /*&game->pacman*/);
 
     }
     // Tempo do Modo DEUS
@@ -106,7 +111,7 @@ void UpdateGame(GameState *game, float dt) {
             if(t == WALL) DrawRectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, BLUE);
             else if (t == PELLET) DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 4, GOLD);
             else if (t == POWER_PELLET) DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 8,  ORANGE);
-            else if (t == PORTAL) DrawRectangel(x, y, BLOCK_SIZE, BLOCK_SIZE, DARKPURPLE);
+            else if (t == PORTAL) DrawRectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, DARKPURPLE);
 
         }
     }

@@ -8,22 +8,19 @@ INC_DIR = include
 # Flags de compilação
 CFLAGS = -Wall -Wextra -I$(INC_DIR)
 
-# Flags de linkagem (UCRT64 + RAYLIB)
-LDFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm
+# Flags de linkagem (Windows + Raylib)
+LDFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 
-# Lista de arquivos .c dentro de src/
+# Arquivos fonte
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
 
-# Transforma .c → .o
+# Objetos
 OBJECTS = $(SOURCES:.c=.o)
 
-# Nome do executável
+# Executável
 TARGET = pacman.exe
 
-# -------------------------
-# REGRAS
-# -------------------------
-
+# Regras
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)

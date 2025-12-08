@@ -148,7 +148,7 @@ void MoveGhost(Ghost *ghost, Map *map) {
 
 }
 
-void UpdateGhost (Ghost *ghost, Map *map, Pacman *pacman) {
+void UpdateGhost (Ghost *ghost, Map *map /*Pacman *pacman*/) {
     // Os fantasmas também podem usar portais
     TileType t = GetTile(map, ghost->pos.row, ghost->pos.col);
     if (t == PORTAL) {

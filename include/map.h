@@ -8,7 +8,7 @@ typedef enum {
     WALL   = '#',
     PELLET = '.',
     POWER_PELLET = 'o',
-    PACMAN_START = 'p',
+    PACMAN_START = 'P',
     GHOST_START  = 'F',
     PORTAL   = 'T',
 
