@@ -22,7 +22,7 @@ static bool CanMoveTo(Map *map, int row, int col) {
     // Verifica se Pacman pode se mover para a posição (row, col)
 }
 
-void MovePacman(Pacman *pacman, Map *map) {
+PacmanEvent MovePacman(Pacman *pacman, Map *map) {
     // Nas Direções: 0=Direita, 1=Baixo, 2=Esquerda, 3=Cima
     const int dr[4] = {0, 1, 0, -1};
     const int dc[4] = {1, 0, -1, 0};
@@ -40,37 +40,40 @@ void MovePacman(Pacman *pacman, Map *map) {
         if(or >= 0) {
             pacman->pos.row = or;
             pacman->pos.col = oc;
-            return; // Sai da função após usar o portal
+            return PACMAN_EVENT_NONE; // Sai da função após usar o portal
 
         } 
     }
 // Movimento normal
-    if(CanMoveTo(map,nr, nc)) {
+    if(CanMoveTo(map, nr, nc)) {
         pacman->pos.row = nr;
         pacman->pos.col = nc;
 
         TileType t = GetTile(map, nr, nc);
         if( t == PELLET) {
             SetTile(map, nr, nc, EMPTY);
-            pacman->score += 10;
-            map->pelletCount--; // Decrementa o contador de pellets
+            map->pelletCount--;
+            return PACMAN_EVENT_PELLET; // Decrementa o contador de pellets
         } else if( t == POWER_PELLET) {
             SetTile(map, nr, nc, EMPTY);
-            pacman->score += 50;
-            map->powerPelletCount--; // Decrementa o contador de power pellets
+            map->powerPelletCount--;
+            return PACMAN_EVENT_POWER_PELLET; // Decrementa o contador de power pellets
         }
     }
+
+    return PACMAN_EVENT_NONE; // Nenhum evento
+
 }
 
 
 // Atualiza o estado do Pacman com base na entrada do jogador
-void UpdatePacman(Pacman *pacman, Map *map) {
+PacmanEvent UpdatePacman(Pacman *pacman, Map *map) {
     if(IsKeyPressed(KEY_UP)) pacman->pos.direction = DIR_UP;
     if (IsKeyPressed(KEY_DOWN)) pacman->pos.direction = DIR_DOWN;
     if (IsKeyPressed(KEY_LEFT)) pacman->pos.direction = DIR_LEFT;
     if (IsKeyPressed(KEY_RIGHT)) pacman->pos.direction = DIR_RIGHT;
 
-    MovePacman(pacman, map); // Tenta mover Pacman na direção atual
+    return MovePacman(pacman, map); // Tenta mover Pacman na direção atual
 
 }
 
@@ -96,12 +99,17 @@ static int CountAvailableDirections(Map *map, int r, int c, int avail[4]){
     const int dr[4] = {0,1,0,-1};
     const int dc[4] = {1,0,-1,0};
     int count = 0;
+
     for(int d = 0; d < 4; d++) {
         int nr = r + dr[d];
         int nc = c + dc[d];
         TileType t = GetTile(map, nr, nc);
-        if (IsWalkable(t)) { avail[d] = 1; count++;
-        }else avail[d] = 0;
+        if (IsWalkable(t)) { 
+            avail[d] = 1; 
+            count++;
+        }else {
+            avail[d] = 0;
+        }
     }
     return count;
 }
@@ -131,24 +139,30 @@ void MoveGhost(Ghost *ghost, Map *map) {
 
     // Tenta escolher uma direção aleatória diferente da atual
     int reverse = (ghost->pos.direction + 2) % 4;
-    int choices[4]; int n = 0;
+    int choices[4]; 
+    int n = 0;
+
     for (int d = 0; d < 4; d++) {
-        if (avail[d] && d != reverse) choices[n++] = d; // Evita voltar
+        if (avail[d] && d != reverse) 
+        choices[n++] = d; // Evita voltar
 
     } 
     if (n == 0) {
         for (int d = 0; d < 4; d++)
-            if (avail[d]) choices[n++] = d; // Só pode voltar
+            if (avail[d]) 
+            choices[n++] = d; // Só pode voltar
     }
 
-    int pick = choices[ GetRandomValue(0 , n -1)]; // Escolhe aleatoriamente
+    int pick = choices[GetRandomValue(0 , n -1)]; // Escolhe aleatoriamente
     ghost->pos.direction = pick;
     ghost->pos.row += dr[pick];
     ghost->pos.col += dc[pick];
 
 }
 
-void UpdateGhost (Ghost *ghost, Map *map /*Pacman *pacman*/) {
+void UpdateGhost (Ghost *ghost, Map *map, Pacman *pacman) {
+    (void)pacman; // Por enquanto não usa o Pacman
+
     // Os fantasmas também podem usar portais
     TileType t = GetTile(map, ghost->pos.row, ghost->pos.col);
     if (t == PORTAL) {
@@ -161,5 +175,5 @@ void UpdateGhost (Ghost *ghost, Map *map /*Pacman *pacman*/) {
     }
 
 
-MoveGhost(ghost, map); // Tenta mover o fantasma
+    MoveGhost(ghost, map); // Tenta mover o fantasma
 }

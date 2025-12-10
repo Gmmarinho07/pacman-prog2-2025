@@ -21,6 +21,13 @@ typedef struct {
     bool moving;
 } Position;
 
+
+typedef enum { // Coiss quem podem acontecer com o Pacman
+    PACMAN_EVENT_NONE = 0,
+    PACMAN_EVENT_PELLET,
+    PACMAN_EVENT_POWER_PELLET
+}PacmanEvent;
+
 typedef struct {
     Position pos;
     int lives;
@@ -46,12 +53,12 @@ typedef struct {
 
 // Funções do Pacman
 void InitPacman(Pacman *pacman, int startRow, int startCol);
-void UpdatePacman(Pacman *pacman, Map *map);
-void MovePacman(Pacman *pacman, Map *map);
+PacmanEvent UpdatePacman(Pacman *pacman, Map *map);
+PacmanEvent MovePacman(Pacman *pacman, Map *map);
 
 // Funções dos fantasmas
 void InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
-void UpdateGhost(Ghost *ghost, Map *map /*Pacman *pacman*/);
+void UpdateGhost(Ghost *ghost, Map *map ,Pacman *pacman);
 void MoveGhost(Ghost *ghost, Map *map);
 
 #endif

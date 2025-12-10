@@ -14,10 +14,12 @@
 #define BLOCK_SIZE 40
 #define HUD_HEIGHT 40
 
+// Duração do modo power-up em segundos
+#define POWER_MODE_TIME 8.0f
+
 
 typedef enum {
     MENU_MAIN,
-    MENU_PAUSE,
     GAME_ACTIVE,
     GAME_OVER
 } GameScreen;  // Telas do jogo
@@ -37,6 +39,9 @@ typedef struct {
 
     bool powerMode;
     float powerTimer;
+
+    int ghostBaseRow;
+    int ghostBaseCol;
 
     Camera2D camera; // Câmera do jogo
 
