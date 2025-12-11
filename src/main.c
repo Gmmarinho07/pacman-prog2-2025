@@ -21,10 +21,3 @@ int main(void) {
     CleanupGame(&game);
     return 0;
 }
-
-// --- GAMBIS PRO WINDOWS/UCRT64 ---
-// Alguns toolchains usam entrada WinMain em vez de main.
-// Aqui a gente só redireciona WinMain -> main.
-int WinMain() {
-    return main();
-}

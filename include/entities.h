@@ -5,61 +5,72 @@
 #include "map.h"
 #include <stdbool.h>
 
+/* Direções possíveis (usadas em Position.direction / nextDirection) */
 typedef enum {
     DIR_RIGHT = 0,
-    DIR_DOWN = 1,
-    DIR_LEFT = 2,
-    DIR_UP = 3
-
-} Direction;  // Direções possíveis
+    DIR_DOWN  = 1,
+    DIR_LEFT  = 2,
+    DIR_UP    = 3
+} Direction;
 
 typedef struct {
     int row;
     int col;
-    Direction direction;
-    Direction nextDirection;  // Próxima direção desejada
+    Direction direction;      /* direção atual */
+    Direction nextDirection;  /* direção desejada (input do jogador) */
     bool moving;
 } Position;
 
-
-typedef enum { // Coiss quem podem acontecer com o Pacman
-    PACMAN_EVENT_NONE = 0,
+/* Eventos que o Pacman pode gerar ao mover-se */
+typedef enum {
+    PACMAN_EVENT_NONE,
     PACMAN_EVENT_PELLET,
     PACMAN_EVENT_POWER_PELLET
-}PacmanEvent;
+} PacmanEvent;
 
+/* Estrutura do Pacman */
 typedef struct {
     Position pos;
     int lives;
     bool alive;
     int score;
+
+    /* Controle de movimentação por tempo:
+       moveTimer decrementa com dt; quando <= 0, Pacman dá um passo e moveTimer = moveDelay.
+       moveDelay é o intervalo (em segundos) entre passos — maior = mais lento. */
+    float moveTimer;
+    float moveDelay;
 } Pacman;
 
+/* Modos do fantasma */
 typedef enum {
     SCATTER,
     CHASE,
-    FRIGHTENED,
-
+    FRIGHTENED
 } GhostMode;
 
+/* Estrutura do fantasma
+   NOTE: 'speed' aqui é interpretado como tempo entre passos (segundos). 
+   Valores menores -> movimentos mais rápidos. */
 typedef struct {
     Position pos;
     GhostMode mode;
-    Color color; // Cores dos fantasmas
+    Color color;
     bool alive;
-    float speed; // Velocidade do fantasma
-    float frightenedTimer; // Tempo do modo assustado
+
+    float speed;           /* intervalo entre passos (segundos) */
+    float frightenedTimer; /* tempo restante em estado assustado (segundos) */
+    float moveTimer;       /* timer interno para controlar passos */
 } Ghost;
 
-// Funções do Pacman
+/* Funções do Pacman */
 void InitPacman(Pacman *pacman, int startRow, int startCol);
-PacmanEvent UpdatePacman(Pacman *pacman, Map *map);
+PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt);
 PacmanEvent MovePacman(Pacman *pacman, Map *map);
 
-// Funções dos fantasmas
+/* Funções dos fantasmas */
 void InitGhost(Ghost *ghost, int startRow, int startCol, Color color);
-void UpdateGhost(Ghost *ghost, Map *map ,Pacman *pacman);
+void UpdateGhost(Ghost *ghost, Map *map ,Pacman *pacman, float dt);
 void MoveGhost(Ghost *ghost, Map *map);
 
-#endif
-
+#endif /* ENTITIES_H */

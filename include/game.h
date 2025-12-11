@@ -45,12 +45,15 @@ typedef struct {
 
     Camera2D camera; // Câmera do jogo
 
+    char mapFile[256]; // armazena o nome do arquivo do mapa
+
 } GameState;
 
 
 // Funções princiapais do jogo
 
 bool InitGame(GameState *game, const char *mapFile);
+bool ResetLevel(GameState *game, const char *mapFile); // Reinicia o nível atual
 void UpdateGame(GameState *game, float dt);
 void RenderGame(GameState *game); // Renderiza o jogo
 void CleanupGame(GameState *game); // Limpa os recursos do jogo
