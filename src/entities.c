@@ -2,6 +2,7 @@
 #include "entities.h"
 #include "map.h"
 #include "raylib.h"
+#include <stdio.h>
 
 // -------------------------------------
 // PACMAN
@@ -18,7 +19,7 @@ void InitPacman(Pacman *pacman, int startRow, int startCol) {
     pacman->alive = true;
     pacman->score = 0;
 
-    pacman->moveDelay = 0.12f;
+    pacman->moveDelay = 0.25f;
     pacman->moveTimer = 0.0f;
 }
 
@@ -68,10 +69,10 @@ PacmanEvent MovePacman(Pacman *pacman, Map *map) {
 }
 
 PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) {
-    if (IsKeyPressed(KEY_UP)) pacman->pos.nextDirection = DIR_UP;
-    if (IsKeyPressed(KEY_DOWN)) pacman->pos.nextDirection = DIR_DOWN;
-    if (IsKeyPressed(KEY_LEFT)) pacman->pos.nextDirection = DIR_LEFT;
-    if (IsKeyPressed(KEY_RIGHT)) pacman->pos.nextDirection = DIR_RIGHT;
+    if (IsKeyDown(KEY_UP)) pacman->pos.nextDirection = DIR_UP;
+    if (IsKeyDown(KEY_DOWN)) pacman->pos.nextDirection = DIR_DOWN;
+    if (IsKeyDown(KEY_LEFT)) pacman->pos.nextDirection = DIR_LEFT;
+    if (IsKeyDown(KEY_RIGHT)) pacman->pos.nextDirection = DIR_RIGHT;
 
     pacman->moveTimer -= dt;
     if (pacman->moveTimer > 0.0f) return PACMAN_EVENT_NONE;
@@ -110,7 +111,7 @@ void InitGhost(Ghost *ghost, int startRow, int startCol, Color color) {
     ghost->mode = SCATTER;
     ghost->color = color;
 
-    ghost->speed = 0.35f;       // tempo entre passos (maior = mais lento)
+    ghost->speed = 0.25f;       // tempo entre passos (maior = mais lento)
     ghost->moveTimer = 0.0f;
     ghost->frightenedTimer = 0.0f;
 }

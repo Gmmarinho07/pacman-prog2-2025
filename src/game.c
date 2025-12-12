@@ -1,3 +1,4 @@
+// src/game.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,27 +6,25 @@
 #include "map.h"
 #include "entities.h"
 #include "raylib.h"
+#include "game_data.h"   // contém GameSaveData e protótipos SaveGame / LoadGame
 
 #define HUD_HEIGHT 40
 #define MAPFILE_MAX 256
+#define SAVE_FILE "pacman_save.bin"
 
-/* Armazena o caminho do mapa entre InitGame/ResetLevel sem precisar alterar o header */
-// static char g_mapFile[MAPFILE_MAX] = {0};
-
-// Funções de sprites
+/* --- Sprites / utilitários --- */
 
 static void DrawPacmanSprite(const GameState *game) {
     int cx = game->pacman.pos.col * BLOCK_SIZE + BLOCK_SIZE / 2;
     int cy = game->pacman.pos.row * BLOCK_SIZE + BLOCK_SIZE / 2;
     float radius = BLOCK_SIZE / 2.0f - 6.0f;
 
-    // Uma animação simples da boca
     static int frame = 0;
     frame++;
     bool mouthOpen = ((frame / 8) % 2) == 0; // Alterna a boca aberta e fechada
 
     float startAngle = 0.0f;
-    float endAngle = 360.0f; // Um círculo completo com a boca
+    float endAngle = 360.0f;
 
     if (mouthOpen) {
         switch (game->pacman.pos.direction) {
@@ -41,8 +40,7 @@ static void DrawPacmanSprite(const GameState *game) {
     }
 }
 
-/* Cria/posiciona Pacman e fantasmas lendo o mapa atual.
-   Mantém os seus comentários e intenção original. */
+/* --- Spawn de entidades a partir do mapa --- */
 static void SpawnEntitiesFromMap(GameState *game) {
     Color ghostColors[4] = { RED, PINK, ORANGE, BLUE };
 
@@ -61,6 +59,8 @@ static void SpawnEntitiesFromMap(GameState *game) {
             TileType t = GetTile(game->map, r, c);
 
             if (t == PACMAN_START) {
+                game->pacmanBaseRow = r;
+                game->pacmanBaseCol = c;
                 InitPacman(&game->pacman, r, c);
                 SetTile(game->map, r, c, EMPTY);
                 pacmanFound = true;
@@ -71,6 +71,11 @@ static void SpawnEntitiesFromMap(GameState *game) {
 
                 game->ghostCount = 4;
                 game->ghosts = malloc(sizeof(Ghost) * game->ghostCount);
+                if (!game->ghosts) {
+                    game->ghostCount = 0;
+                    ghostsSpawned = true; // evita repetição se alocação falhar
+                    continue;
+                }
                 for (int i = 0; i < game->ghostCount; i++) {
                     InitGhost(&game->ghosts[i], r, c, ghostColors[i]);
                 }
@@ -87,13 +92,13 @@ static void SpawnEntitiesFromMap(GameState *game) {
     }
 }
 
-// Inicializa o jogo
+/* --- Inicialização / Reinício --- */
 
 bool InitGame(GameState *game, const char *mapFile) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pac-Man - Prog2");
     SetTargetFPS(60);
 
-    /* CORREÇÃO OBRIGATÓRIA: salvar nome do mapa */
+    /* salvar nome do mapa */
     strncpy(game->mapFile, mapFile, sizeof(game->mapFile));
     game->mapFile[sizeof(game->mapFile)-1] = '\0';
 
@@ -129,7 +134,6 @@ bool InitGame(GameState *game, const char *mapFile) {
     return true;
 }
 
-
 // Reinicia o nível sem fechar a janela
 bool ResetLevel(GameState *game, const char *mapFile) {
 
@@ -148,6 +152,7 @@ bool ResetLevel(GameState *game, const char *mapFile) {
     }
 
     game->score = 0;
+    game->pacman.lives = 3; // Resetar vidas
     game->powerMode = false;
     game->powerTimer = 0.0f;
     game->pelletsRemaining = game->map->pelletCount + game->map->powerPelletCount;
@@ -159,7 +164,7 @@ bool ResetLevel(GameState *game, const char *mapFile) {
     return true;
 }
 
-
+/* --- Loop de atualização --- */
 
 void UpdateGame(GameState *game, float dt) {
     switch (game->currentScreen) {
@@ -178,6 +183,11 @@ void UpdateGame(GameState *game, float dt) {
             break;
 
         case GAME_ACTIVE: {
+            // Pressionar TAB pausa o jogo
+            if (IsKeyPressed(KEY_TAB)) {
+                game->currentScreen = GAME_PAUSED;
+                return;
+            }
 
             // -------- PACMAN --------
             PacmanEvent ev = UpdatePacman(&game->pacman, game->map, dt);
@@ -185,7 +195,7 @@ void UpdateGame(GameState *game, float dt) {
             if (ev == PACMAN_EVENT_PELLET) {
                 game->score += 10;
                 game->pelletsRemaining--;
-            } 
+            }
             else if (ev == PACMAN_EVENT_POWER_PELLET) {
                 game->score += 50;
                 game->pelletsRemaining--;
@@ -200,6 +210,13 @@ void UpdateGame(GameState *game, float dt) {
 
             // -------- FANTASMAS --------
             for (int i = 0; i < game->ghostCount; i++) {
+                Ghost *g = &game->ghosts[i];
+
+                if (g->mode == FRIGHTENED) {
+                    g->speed = 0.33f; // mais lento
+                } else {
+                    g->speed = 0.25f; // normal
+                }
                 UpdateGhost(&game->ghosts[i], game->map, &game->pacman, dt);
             }
 
@@ -222,19 +239,20 @@ void UpdateGame(GameState *game, float dt) {
                     g->pos.col == game->pacman.pos.col) {
 
                     if (game->powerMode && g->mode == FRIGHTENED) {
-                        game->score += 200;
+                        game->score += 100;
                         g->pos.row = game->ghostBaseRow;
                         g->pos.col = game->ghostBaseCol;
                         g->mode = SCATTER;
-                    } 
+                    }
                     else {
                         game->pacman.lives--;
+                        game->score = (game->score >= 200) ? game->score - 200 : 0;
                         if (game->pacman.lives <= 0) {
                             game->currentScreen = GAME_OVER;
-                        } 
+                        }
                         else {
-                            game->pacman.pos.row = 1;
-                            game->pacman.pos.col = 1;
+                            InitPacman(&game->pacman, game->pacmanBaseRow, game->pacmanBaseCol);
+                            InitGhost(&game->ghosts[i], game->ghostBaseRow, game->ghostBaseCol, game->ghosts[i].color);
                         }
                     }
                 }
@@ -248,20 +266,58 @@ void UpdateGame(GameState *game, float dt) {
             break;
         }
 
+        case GAME_PAUSED: {
+            // Voltar ao jogo
+            if (IsKeyPressed(KEY_V)) {
+                game->currentScreen = GAME_ACTIVE;
+            }
+            // Novo jogo: reinicia usando o arquivo atual do jogo
+            else if (IsKeyPressed(KEY_N)) {
+                game->pacman.lives = 3;
+                game->score = 0;
+                game->level = 1;
+                ResetLevel(game, game->mapFile);
+                game->currentScreen = GAME_ACTIVE;
+            }
+            // Salvar jogo
+            else if (IsKeyPressed(KEY_S)) {
+                if (SaveGame(game, SAVE_FILE)) {
+                    printf("Jogo salvo com sucesso!\n");
+                } else {
+                    printf("Erro ao salvar o jogo!\n");
+                }
+            }
+            // Carregar jogo
+            else if (IsKeyPressed(KEY_C)) {
+                if (LoadGame(game, SAVE_FILE)) {
+                    printf("Jogo carregado com sucesso!\n");
+                    game->currentScreen = GAME_ACTIVE;
+                } else {
+                    printf("Erro ao carregar o jogo!\n");
+                }
+            }
+            // Sair do jogo
+            else if (IsKeyPressed(KEY_Q)) {
+                CloseWindow();
+            }
+            break;
+        }
+
         case GAME_OVER:
             if (IsKeyPressed(KEY_ENTER)) {
-                /* CORREÇÃO — usa o arquivo salvo em InitGame */
+                /* Reinicia o nível atual */
                 ResetLevel(game, game->mapFile);
+                game->currentScreen = MENU_MAIN;
             }
             if (IsKeyPressed(KEY_ESCAPE)) {
                 CloseWindow();
             }
             break;
-    }
+    } // switch
 }
 
+/* --- Render --- */
 
-// Renderiza o jogo
 void RenderGame(GameState *game) {
     BeginDrawing();
     ClearBackground(BLACK);
@@ -276,11 +332,9 @@ void RenderGame(GameState *game) {
 
         case GAME_ACTIVE:
         case GAME_OVER: {
-
             /* Desenha o mapa */
             for (int r = 0; r < game->map->rows; r++) {
                 for (int c = 0; c < game->map->cols; c++) {
-
                     int x = c * BLOCK_SIZE;
                     int y = r * BLOCK_SIZE;
                     TileType t = GetTile(game->map, r, c);
@@ -288,11 +342,11 @@ void RenderGame(GameState *game) {
                     if (t == WALL)
                         DrawRectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, BLUE);
                     else if (t == PELLET)
-                        DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 4, GOLD);
+                        DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 4, WHITE);
                     else if (t == POWER_PELLET)
-                        DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 8, ORANGE);
+                        DrawCircle(x + BLOCK_SIZE / 2, y + BLOCK_SIZE / 2, 8, GREEN);
                     else if (t == PORTAL)
-                        DrawRectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, DARKPURPLE);
+                        DrawRectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, PINK);
                 }
             }
 
@@ -309,13 +363,13 @@ void RenderGame(GameState *game) {
 
                 Color drawColor = g->color;
                 if (game->powerMode && g->mode == FRIGHTENED)
-                    drawColor = SKYBLUE;
+                    drawColor = WHITE;
 
                 DrawCircle(cx, cy, radius, drawColor);
             }
 
             DrawText(
-                TextFormat("Score: %d | Lives: %d | Pellets: %d",
+                TextFormat("Score: %06d | Lives: %d | Pellets: %d",
                     game->score, game->pacman.lives, game->pelletsRemaining),
                 10, game->map->rows * BLOCK_SIZE + 8, 20, WHITE
             );
@@ -328,15 +382,28 @@ void RenderGame(GameState *game) {
 
             break;
         }
+
+        case GAME_PAUSED: {
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Fade(BLACK, 0.8f));
+
+            DrawText("PAUSADO", 650, 200, 40, WHITE);
+            DrawText("Pressione uma opcao:", 600, 260, 25, GRAY);
+
+            DrawText("N - Novo Jogo", 650, 320, 30, YELLOW);
+            DrawText("V - Voltar ao Jogo", 650, 370, 30, YELLOW);
+            DrawText("S - Salvar Jogo", 650, 420, 30, YELLOW);
+            DrawText("C - Carregar Jogo", 650, 470, 30, YELLOW);
+            DrawText("ESC - Sair do Jogo", 650, 520, 30, YELLOW);
+            break;
+        }
     }
 
     EndDrawing();
 }
 
+/* --- Cleanup --- */
 
-// Limpa os recursos do jogo
 void CleanupGame(GameState *game) {
-
     if (game->map) {
         FreeMap(game->map);
         free(game->map);

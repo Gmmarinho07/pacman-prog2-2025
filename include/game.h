@@ -20,8 +20,9 @@
 
 typedef enum {
     MENU_MAIN,
-    GAME_ACTIVE,
-    GAME_OVER
+    GAME_ACTIVE,// Jogo em andamento
+    GAME_OVER, // Tela de fim de jogo
+    GAME_PAUSED // Tela de pausa
 } GameScreen;  // Telas do jogo
 
 typedef struct {
@@ -42,6 +43,9 @@ typedef struct {
 
     int ghostBaseRow;
     int ghostBaseCol;
+
+    int pacmanBaseRow;
+    int pacmanBaseCol;
 
     Camera2D camera; // Câmera do jogo
 
