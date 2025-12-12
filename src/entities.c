@@ -4,9 +4,7 @@
 #include "raylib.h"
 #include <stdio.h>
 
-// -------------------------------------
-// PACMAN
-// -------------------------------------
+// ------Agora sim o Pacman------
 
 void InitPacman(Pacman *pacman, int startRow, int startCol) {
     pacman->pos.row = startRow;
@@ -28,7 +26,7 @@ static bool CanMoveTo(Map *map, int row, int col) {
     return IsWalkable(t);
 }
 
-PacmanEvent MovePacman(Pacman *pacman, Map *map) {
+PacmanEvent MovePacman(Pacman *pacman, Map *map) { // tenta mover Pacman na direção atual
     const int dr[4] = {0,1,0,-1};
     const int dc[4] = {1,0,-1,0};
 
@@ -37,7 +35,7 @@ PacmanEvent MovePacman(Pacman *pacman, Map *map) {
 
     TileType dest = GetTile(map, nr, nc);
 
-    if (dest == PORTAL) {
+    if (dest == PORTAL) { // teleporte
         int or, oc;
         FindOtherPortal(map, nr, nc, &or, &oc);
         if (or >= 0) {
@@ -47,7 +45,7 @@ PacmanEvent MovePacman(Pacman *pacman, Map *map) {
         }
     }
 
-    PacmanEvent ev = PACMAN_EVENT_NONE;
+    PacmanEvent ev = PACMAN_EVENT_NONE; // nenhum evento por padrão
 
     if (CanMoveTo(map, nr, nc)) {
         pacman->pos.row = nr;
@@ -68,7 +66,7 @@ PacmanEvent MovePacman(Pacman *pacman, Map *map) {
     return ev;
 }
 
-PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) {
+PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) { // atualiza o estado do Pacman
     if (IsKeyDown(KEY_UP)) pacman->pos.nextDirection = DIR_UP;
     if (IsKeyDown(KEY_DOWN)) pacman->pos.nextDirection = DIR_DOWN;
     if (IsKeyDown(KEY_LEFT)) pacman->pos.nextDirection = DIR_LEFT;
@@ -88,15 +86,13 @@ PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) {
         pacman->pos.direction = pacman->pos.nextDirection;
     }
 
-    PacmanEvent ev = MovePacman(pacman, map);
+    PacmanEvent ev = MovePacman(pacman, map); // tenta mover Pacman
     pacman->moveTimer = pacman->moveDelay;
 
     return ev;
 }
 
-// -------------------------------------
-// FANTASMAS
-// -------------------------------------
+// ------E os fantasmas------
 
 void InitGhost(Ghost *ghost, int startRow, int startCol, Color color) {
     ghost->pos.row = startRow;
@@ -104,7 +100,7 @@ void InitGhost(Ghost *ghost, int startRow, int startCol, Color color) {
     ghost->pos.direction = DIR_LEFT;
     ghost->pos.nextDirection = DIR_LEFT;
 
-    /* CORREÇÃO: setar pos.moving (não ghost->moving) */
+
     ghost->pos.moving = true;
 
     ghost->alive = true;
@@ -135,7 +131,7 @@ static int CountAvailableDirections(Map *map, int r, int c, int avail[4]) {
     return count;
 }
 
-void MoveGhost(Ghost *ghost, Map *map) {
+void MoveGhost(Ghost *ghost, Map *map) { // tenta mover o fantasma
     const int dr[4] = {0,1,0,-1};
     const int dc[4] = {1,0,-1,0};
 
@@ -174,7 +170,7 @@ void MoveGhost(Ghost *ghost, Map *map) {
     ghost->pos.col += dc[pick];
 }
 
-void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman, float dt) {
+void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman, float dt) { // atualiza o estado do fantasma
     (void)pacman; // atualmente não usado
     TileType t = GetTile(map, ghost->pos.row, ghost->pos.col);
 

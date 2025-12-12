@@ -1,4 +1,3 @@
-// src/game.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,13 +5,13 @@
 #include "map.h"
 #include "entities.h"
 #include "raylib.h"
-#include "game_data.h"   // contém GameSaveData e protótipos SaveGame / LoadGame
+#include "game_data.h"  
 
 #define HUD_HEIGHT 40
 #define MAPFILE_MAX 256
 #define SAVE_FILE "pacman_save.bin"
 
-/* --- Sprites / utilitários --- */
+// Sprites dos personagens
 
 static void DrawPacmanSprite(const GameState *game) {
     int cx = game->pacman.pos.col * BLOCK_SIZE + BLOCK_SIZE / 2;
@@ -40,14 +39,14 @@ static void DrawPacmanSprite(const GameState *game) {
     }
 }
 
-/* --- Spawn de entidades a partir do mapa --- */
+// Gera Pacman e Fantasmas a partir do mapa
 static void SpawnEntitiesFromMap(GameState *game) {
     Color ghostColors[4] = { RED, PINK, ORANGE, BLUE };
 
     bool pacmanFound = false;
     bool ghostsSpawned = false;
 
-    /* limpa ghosts antigos se houver */
+    // Limpa fantasmas existentes
     if (game->ghosts) {
         free(game->ghosts);
         game->ghosts = NULL;
@@ -92,13 +91,13 @@ static void SpawnEntitiesFromMap(GameState *game) {
     }
 }
 
-/* --- Inicialização / Reinício --- */
+// Inicializa o jogo
 
 bool InitGame(GameState *game, const char *mapFile) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pac-Man - Prog2");
     SetTargetFPS(60);
 
-    /* salvar nome do mapa */
+    
     strncpy(game->mapFile, mapFile, sizeof(game->mapFile));
     game->mapFile[sizeof(game->mapFile)-1] = '\0';
 
@@ -164,14 +163,14 @@ bool ResetLevel(GameState *game, const char *mapFile) {
     return true;
 }
 
-/* --- Loop de atualização --- */
+// Atualiza o estado do jogo
 
 void UpdateGame(GameState *game, float dt) {
     switch (game->currentScreen) {
 
         case MENU_MAIN:
             if (IsKeyPressed(KEY_ENTER)) {
-                /* Reinicio seguro */
+                
                 if (game->pacman.lives <= 0 || game->pelletsRemaining <= 0)
                     ResetLevel(game, game->mapFile);
 
@@ -271,7 +270,7 @@ void UpdateGame(GameState *game, float dt) {
             if (IsKeyPressed(KEY_V)) {
                 game->currentScreen = GAME_ACTIVE;
             }
-            // Novo jogo: reinicia usando o arquivo atual do jogo
+            
             else if (IsKeyPressed(KEY_N)) {
                 game->pacman.lives = 3;
                 game->score = 0;
@@ -316,7 +315,7 @@ void UpdateGame(GameState *game, float dt) {
     } // switch
 }
 
-/* --- Render --- */
+// Renderiza o estado atual do jogo
 
 void RenderGame(GameState *game) {
     BeginDrawing();
@@ -332,7 +331,7 @@ void RenderGame(GameState *game) {
 
         case GAME_ACTIVE:
         case GAME_OVER: {
-            /* Desenha o mapa */
+            
             for (int r = 0; r < game->map->rows; r++) {
                 for (int c = 0; c < game->map->cols; c++) {
                     int x = c * BLOCK_SIZE;
@@ -401,7 +400,7 @@ void RenderGame(GameState *game) {
     EndDrawing();
 }
 
-/* --- Cleanup --- */
+//Limpeza e fechamento do jogo
 
 void CleanupGame(GameState *game) {
     if (game->map) {

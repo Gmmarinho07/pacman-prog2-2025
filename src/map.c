@@ -50,7 +50,7 @@ void FreeMap(Map *map) {
         map->tiles = NULL;
     }
 
-    /* CORREÇÃO — resetar tudo para evitar valores sujos */
+    
     map->rows = 0;
     map->cols = 0;
     map->pelletCount = 0;
@@ -68,10 +68,7 @@ void SetTile(Map *map, int row, int col, TileType tile) {
     if (!map || !map->tiles) return;
     if (row < 0 || col < 0 || row >= map->rows || col >= map->cols) return;
     TileType prev = map->tiles[row * map->cols + col];
-    if (prev == POWER_PELLET && tile == EMPTY) {
-        // DEBUG: detectamos um power pellet sendo sobrescrito
-        // Imprime um stack hint mínimo: nome do arquivo e linha chamadora não disponíveis em C padrão,
-        // por isso imprimimos também o estado principal do jogo que ajudará a identificar a origem.
+    if (prev == POWER_PELLET && tile == EMPTY) { // Aqui tentei um debug porem n consegui ver o erro deixei pq fez parte do processo
         printf("[DEBUG SetTile] POWER_PELLET -> EMPTY at r=%d c=%d (prev='%c').\n", row, col, (char)prev);
     }
 

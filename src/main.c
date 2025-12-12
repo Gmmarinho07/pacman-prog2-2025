@@ -1,8 +1,8 @@
-// src/main.c
+
 #include "raylib.h"
 #include "game.h"
 
-// Protótipo de main (usado pela WinMain)
+
 int main(void);
 
 int main(void) {

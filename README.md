@@ -25,3 +25,7 @@ O `Makefile` usa `gcc` e flags específicas para Raylib no ambiente Windows.
 Abra o terminal na pasta raiz do projeto e execute:
 ```bash
 make all
+
+make run
+# ou diretamente:
+./pacman.exe

@@ -1,20 +1,18 @@
-// src/game_data.c
 #include "game_data.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> 
 
-// Cores padrão para fantasmas — escolha a mesma ordem que usa em SpawnEntitiesFromMap
+// cores dos fantasmas  mantidos
 static const Color DEFAULT_GHOST_COLORS[4] = { RED, PINK, ORANGE, BLUE };
 
-// Funcao para salvar o estado do jogo em arquivo binario (Req. 2.10)
+// Funcao para salvar
 bool SaveGame(const GameState *game, const char *filename) {
     if (!game || !game->map) return false;
 
     GameSaveData data;
     memset(&data, 0, sizeof(data));
 
-    // 1. Copia o estado do jogo para a struct serializavel
     data.score = game->score;
     data.lives = game->pacman.lives;
     data.level = game->level;
@@ -24,14 +22,13 @@ bool SaveGame(const GameState *game, const char *filename) {
 
     data.pacmanPos = game->pacman.pos;
     
-    // 2. Copia Fantasmas (limitado a 4)
     data.ghostCount = (game->ghostCount > 4) ? 4 : game->ghostCount;
     for (int i = 0; i < data.ghostCount; i++) {
         data.ghostPositions[i] = game->ghosts[i].pos;
         data.ghostModes[i] = game->ghosts[i].mode;
     }
     
-    // 3. Copia o Mapa (matriz plana)
+    
     // garante que map->tiles está alocado no tamanho esperado
     if (!game->map->tiles) return false;
     memcpy(data.mapTiles, game->map->tiles, MAP_ROWS * MAP_COLS * sizeof(TileType));
@@ -45,7 +42,7 @@ bool SaveGame(const GameState *game, const char *filename) {
     return written == 1;
 }
 
-// Funcao para carregar o estado do jogo de arquivo binario (Req. 2.10)
+
 bool LoadGame(GameState *game, const char *filename) {
     if (!game) return false;
 
@@ -69,13 +66,13 @@ bool LoadGame(GameState *game, const char *filename) {
         game->map->powerPelletCount = 0;
     }
 
-    // (Re)aloca tiles para o mapa se necessário
+    
     if (!game->map->tiles) {
         game->map->tiles = malloc(MAP_ROWS * MAP_COLS * sizeof(TileType));
         if (!game->map->tiles) return false;
     }
 
-    // 1. Restaura o estado do jogo
+    //restaura o estado do jogo
     game->score = data.score;
     game->pacman.lives = data.lives;
     game->level = data.level;
@@ -83,10 +80,10 @@ bool LoadGame(GameState *game, const char *filename) {
     game->powerMode = data.powerMode;
     game->powerTimer = data.powerTimer;
 
-    // 2. Restaura Pacman e Fantasmas
+
     game->pacman.pos = data.pacmanPos;
 
-    // Reinicializa fantasmas com as posicoes salvas
+    
     if (game->ghosts) {
         free(game->ghosts);
         game->ghosts = NULL;
@@ -102,20 +99,20 @@ bool LoadGame(GameState *game, const char *filename) {
     }
 
     for (int i = 0; i < game->ghostCount; i++) {
-        // inicializa ghost com cor padrão e valores base
+        
         Color col = DEFAULT_GHOST_COLORS[i % 4];
         InitGhost(&game->ghosts[i], data.ghostPositions[i].row, data.ghostPositions[i].col, col);
-        // agora ajuste estado salvo
+        // agora ajuste estado salvado
         game->ghosts[i].pos = data.ghostPositions[i];
         game->ghosts[i].mode = data.ghostModes[i];
     }
 
-    // 3. Restaura o Mapa (copia a matriz plana para o array dinâmico)
-    memcpy(game->map->tiles, data.mapTiles, MAP_ROWS * MAP_COLS * sizeof(TileType));
+    
+    memcpy(game->map->tiles, data.mapTiles, MAP_ROWS * MAP_COLS * sizeof(TileType)); // aqui tive que pesquisar oq memcpy faz
     game->map->rows = MAP_ROWS;
     game->map->cols = MAP_COLS;
 
-    // Recalcula contagem de pellets (opcional, coerente com o savedata)
+
     game->map->pelletCount = 0;
     game->map->powerPelletCount = 0;
     for (int i = 0; i < MAP_ROWS * MAP_COLS; ++i) {

@@ -12,7 +12,7 @@ typedef enum {
     GHOST_START  = 'F',
     PORTAL   = 'T',
 
-} TileType;
+} TileType; // Tipos de tiles no mapa
 
 typedef struct {
     int rows;
@@ -20,7 +20,7 @@ typedef struct {
     TileType *tiles;
     int pelletCount;
     int powerPelletCount;
-} Map;
+} Map; // Estrutura do mapa
 
 #define MAP_ROWS 20
 #define MAP_COLS 40
