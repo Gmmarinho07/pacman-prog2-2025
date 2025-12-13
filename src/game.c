@@ -189,6 +189,12 @@ void UpdateGame(GameState *game, float dt) {
             }
 
             // -------- PACMAN --------
+
+            int pacmanPrevRow = game->pacman.pos.row; // para detectar mudança de tile
+            int pacmanPrevCol = game->pacman.pos.col;
+            int ghostPrevRow[4] = {0};
+            int ghostPrevCol[4] = {0};
+
             PacmanEvent ev = UpdatePacman(&game->pacman, game->map, dt);
 
             if (ev == PACMAN_EVENT_PELLET) {
@@ -211,12 +217,16 @@ void UpdateGame(GameState *game, float dt) {
             for (int i = 0; i < game->ghostCount; i++) {
                 Ghost *g = &game->ghosts[i];
 
+                 ghostPrevRow[i] = g->pos.row; // para detectar mudança de tile
+                 ghostPrevCol[i] = g->pos.col;
+
                 if (g->mode == FRIGHTENED) {
                     g->speed = 0.33f; // mais lento
                 } else {
                     g->speed = 0.25f; // normal
                 }
                 UpdateGhost(&game->ghosts[i], game->map, &game->pacman, dt);
+                g->pos.moving = false;
             }
 
             // -------- POWER TIMER --------
@@ -234,8 +244,19 @@ void UpdateGame(GameState *game, float dt) {
             for (int i = 0; i < game->ghostCount; i++) {
                 Ghost *g = &game->ghosts[i];
 
-                if (g->pos.row == game->pacman.pos.row &&
-                    g->pos.col == game->pacman.pos.col) {
+                bool sameTile = 
+                    g->pos.row == game->pacman.pos.row &&
+                    g->pos.col == game->pacman.pos.col;
+                    
+                bool crossed = 
+                    g->pos.row == pacmanPrevRow &&
+                    g->pos.col == pacmanPrevCol &&
+                    ghostPrevRow[i] == game->pacman.pos.row &&
+                    ghostPrevCol[i] == game->pacman.pos.col;
+                    
+                    
+                    if (sameTile || crossed) // colisão detectada
+                    {
 
                     if (game->powerMode && g->mode == FRIGHTENED) {
                         game->score += 100;
@@ -250,8 +271,23 @@ void UpdateGame(GameState *game, float dt) {
                             game->currentScreen = GAME_OVER;
                         }
                         else {
-                            InitPacman(&game->pacman, game->pacmanBaseRow, game->pacmanBaseCol);
-                            InitGhost(&game->ghosts[i], game->ghostBaseRow, game->ghostBaseCol, game->ghosts[i].color);
+                            // Conseto do Erro apontado
+                            game->pacman.pos.row = game->pacmanBaseRow;
+                            game->pacman.pos.col = game->pacmanBaseCol;
+                            game->pacman.pos.direction = DIR_RIGHT;
+                            game->pacman.pos.nextDirection = DIR_RIGHT;
+                            game->pacman.moveTimer = 0.0f;
+
+
+                            // E agoa reposiciona os fantasmas
+
+                            for(int g = 0; g < game->ghostCount; g++) {
+                                game->ghosts[g].pos.row = game->ghostBaseRow;
+                                game->ghosts[g].pos.col = game->ghostBaseCol;
+                                game->ghosts[g].mode = SCATTER;
+                                game->ghosts[g].moveTimer = 0.0f;
+                            }
+                            
                         }
                     }
                 }
