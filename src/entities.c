@@ -72,12 +72,13 @@ PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) { // atualiza o est
     if (IsKeyDown(KEY_LEFT)) pacman->pos.nextDirection = DIR_LEFT;
     if (IsKeyDown(KEY_RIGHT)) pacman->pos.nextDirection = DIR_RIGHT;
 
-    pacman->moveTimer -= dt;
-    if (pacman->moveTimer > 0.0f) return PACMAN_EVENT_NONE;
+    pacman->moveTimer -= dt; // decrementa o timer para o próximo movimento
+    if (pacman->moveTimer > 0.0f) return PACMAN_EVENT_NONE; // ainda não é hora de mover
 
     const int dr[4] = {0,1,0,-1};
     const int dc[4] = {1,0,-1,0};
 
+    // Tenta virar na direção desejada
     int tryRow = pacman->pos.row + dr[pacman->pos.nextDirection];
     int tryCol = pacman->pos.col + dc[pacman->pos.nextDirection];
 
@@ -87,7 +88,7 @@ PacmanEvent UpdatePacman(Pacman *pacman, Map *map, float dt) { // atualiza o est
     }
 
     PacmanEvent ev = MovePacman(pacman, map); // tenta mover Pacman
-    pacman->moveTimer = pacman->moveDelay;
+    pacman->moveTimer = pacman->moveDelay; // reseta o timer de movimento
 
     return ev;
 }
@@ -183,9 +184,9 @@ void UpdateGhost(Ghost *ghost, Map *map, Pacman *pacman, float dt) { // atualiza
         }
     }
 
-    ghost->moveTimer -= dt;
-    if (ghost->moveTimer > 0.0f) return;
+    ghost->moveTimer -= dt; // decrementa o timer de movimento
+    if (ghost->moveTimer > 0.0f) return; // 
 
-    MoveGhost(ghost, map);
-    ghost->moveTimer = ghost->speed;
+    MoveGhost(ghost, map); // tenta mover o fantasma
+    ghost->moveTimer = ghost->speed;// reseta o timer de movimento
 }

@@ -13,7 +13,7 @@ int main(void) {
     }
 
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
+        float dt = GetFrameTime(); // tempo desde o último frame
         UpdateGame(&game, dt);
         RenderGame(&game);
     }

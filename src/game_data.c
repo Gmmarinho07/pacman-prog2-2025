@@ -6,13 +6,14 @@
 // cores dos fantasmas  mantidos
 static const Color DEFAULT_GHOST_COLORS[4] = { RED, PINK, ORANGE, BLUE };
 
-// Funcao para salvar
+// Função para salvar
 bool SaveGame(const GameState *game, const char *filename) {
     if (!game || !game->map) return false;
 
     GameSaveData data;
     memset(&data, 0, sizeof(data));
 
+    // Uso os dados para preencher a struct de salvamento
     data.score = game->score;
     data.lives = game->pacman.lives;
     data.level = game->level;
@@ -33,7 +34,7 @@ bool SaveGame(const GameState *game, const char *filename) {
     if (!game->map->tiles) return false;
     memcpy(data.mapTiles, game->map->tiles, MAP_ROWS * MAP_COLS * sizeof(TileType));
 
-    // 4. Escreve a struct completa no arquivo
+    //Escreve a struct completa no arquivo
     FILE *f = fopen(filename, "wb");
     if (!f) return false;
     size_t written = fwrite(&data, sizeof(GameSaveData), 1, f);
@@ -42,7 +43,7 @@ bool SaveGame(const GameState *game, const char *filename) {
     return written == 1;
 }
 
-
+// Função para carregar o jogo salvo
 bool LoadGame(GameState *game, const char *filename) {
     if (!game) return false;
 
@@ -84,12 +85,12 @@ bool LoadGame(GameState *game, const char *filename) {
     game->pacman.pos = data.pacmanPos;
 
     
-    if (game->ghosts) {
+    if (game->ghosts) { // libera memoria antiga
         free(game->ghosts);
         game->ghosts = NULL;
     }
 
-    game->ghostCount = (data.ghostCount > 4) ? 4 : data.ghostCount;
+    game->ghostCount = (data.ghostCount > 4) ? 4 : data.ghostCount; // limita a 4
     if (game->ghostCount > 0) {
         game->ghosts = malloc(sizeof(Ghost) * game->ghostCount);
         if (!game->ghosts) {
@@ -100,7 +101,7 @@ bool LoadGame(GameState *game, const char *filename) {
 
     for (int i = 0; i < game->ghostCount; i++) {
         
-        Color col = DEFAULT_GHOST_COLORS[i % 4];
+        Color col = DEFAULT_GHOST_COLORS[i % 4]; // mantem as cores padrões dos fantasmas
         InitGhost(&game->ghosts[i], data.ghostPositions[i].row, data.ghostPositions[i].col, col);
         // agora ajuste estado salvado
         game->ghosts[i].pos = data.ghostPositions[i];
@@ -108,7 +109,7 @@ bool LoadGame(GameState *game, const char *filename) {
     }
 
     
-    memcpy(game->map->tiles, data.mapTiles, MAP_ROWS * MAP_COLS * sizeof(TileType)); // aqui tive que pesquisar oq memcpy faz
+    memcpy(game->map->tiles, data.mapTiles, MAP_ROWS * MAP_COLS * sizeof(TileType)); // aqui tive que pesquisar oq memcpy faz, ela copia blocos de memoria de um lugar para outro
     game->map->rows = MAP_ROWS;
     game->map->cols = MAP_COLS;
 

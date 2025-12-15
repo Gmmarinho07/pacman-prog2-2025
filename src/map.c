@@ -9,7 +9,7 @@ bool LoadMap(Map *map, const char *filename) {
 
     map->rows = MAP_ROWS;
     map->cols = MAP_COLS;
-    map->tiles = malloc(sizeof(TileType) * map->rows * map->cols); 
+    map->tiles = malloc(sizeof(TileType) * map->rows * map->cols);  // aloca memória para os tiles
     if(!map->tiles) { fclose(f); return false; }
 
     map->pelletCount = 0;
@@ -24,12 +24,12 @@ bool LoadMap(Map *map, const char *filename) {
             continue;
         }
 
-        int len = (int)strlen(line);
+        int len = (int)strlen(line); // comprimento da linha lida
 
         for(int c = 0; c < map->cols; c++) {
 
-            char ch = (c < len) ? line[c] : ' ';
-            if(ch == '\n' || ch == '\r') ch = ' ';
+            char ch = (c < len) ? line[c] : ' '; // preenche com espaço se a linha for curta
+            if(ch == '\n' || ch == '\r') ch = ' '; // ignora quebras de linha
 
             map->tiles[r * map->cols + c] = (TileType)ch;
 
@@ -42,6 +42,7 @@ bool LoadMap(Map *map, const char *filename) {
     return true;
 }
 
+// Libera a memória alocada para o mapa
 void FreeMap(Map *map) {
     if (!map) return;
 
@@ -59,7 +60,7 @@ void FreeMap(Map *map) {
 
 TileType GetTile(const Map *map, int row, int col) {
     if (!map || !map->tiles) return WALL;
-    if (row < 0 || col < 0 || row >= map->rows || col >= map->cols)
+    if (row < 0 || col < 0 || row >= map->rows || col >= map->cols) // fora dos limites
         return WALL;  
     return map->tiles[row * map->cols + col];
 }
@@ -75,7 +76,7 @@ void SetTile(Map *map, int row, int col, TileType tile) {
     map->tiles[row * map->cols + col] = tile;
 }
 
-bool IsWalkable(TileType tile) {
+bool IsWalkable(TileType tile) { // verifica se o tile pode ser atravessado
     return tile == EMPTY || 
            tile == PELLET || 
            tile == POWER_PELLET || 
@@ -84,7 +85,7 @@ bool IsWalkable(TileType tile) {
            tile == GHOST_START;
 }
 
-void FindOtherPortal(const Map *map, int inR, int inC, int *outR, int *outC) {
+void FindOtherPortal(const Map *map, int inR, int inC, int *outR, int *outC) { // encontra o outro portal no mapa
     if (!map || !map->tiles) {
         *outR = -1;
         *outC = -1;

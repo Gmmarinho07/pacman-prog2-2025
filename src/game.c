@@ -9,16 +9,16 @@
 
 #define HUD_HEIGHT 40
 #define MAPFILE_MAX 256
-#define SAVE_FILE "pacman_save.bin"
+#define SAVE_FILE "pacman_save.bin"  // nome do arquivo de salvamento em binário como pedido
 
 // Sprites dos personagens
 
 static void DrawPacmanSprite(const GameState *game) {
-    int cx = game->pacman.pos.col * BLOCK_SIZE + BLOCK_SIZE / 2;
-    int cy = game->pacman.pos.row * BLOCK_SIZE + BLOCK_SIZE / 2;
-    float radius = BLOCK_SIZE / 2.0f - 6.0f;
+    int cx = game->pacman.pos.col * BLOCK_SIZE + BLOCK_SIZE / 2; // centro x do Pacman
+    int cy = game->pacman.pos.row * BLOCK_SIZE + BLOCK_SIZE / 2; // centro y do Pacman
+    float radius = BLOCK_SIZE / 2.0f - 6.0f; 
 
-    static int frame = 0;
+    static int frame = 0; // contador de frames para animação
     frame++;
     bool mouthOpen = ((frame / 8) % 2) == 0; // Alterna a boca aberta e fechada
 
@@ -43,8 +43,8 @@ static void DrawPacmanSprite(const GameState *game) {
 static void SpawnEntitiesFromMap(GameState *game) {
     Color ghostColors[4] = { RED, PINK, ORANGE, BLUE };
 
-    bool pacmanFound = false;
-    bool ghostsSpawned = false;
+    bool pacmanFound = false; // testa para achar o pacman no mapa
+    bool ghostsSpawned = false; 
 
     // Limpa fantasmas existentes
     if (game->ghosts) {
@@ -61,15 +61,15 @@ static void SpawnEntitiesFromMap(GameState *game) {
                 game->pacmanBaseRow = r;
                 game->pacmanBaseCol = c;
                 InitPacman(&game->pacman, r, c);
-                SetTile(game->map, r, c, EMPTY);
+                SetTile(game->map, r, c, EMPTY); // remove o tile de spawn
                 pacmanFound = true;
             }
             else if (t == GHOST_START && !ghostsSpawned) {
-                game->ghostBaseRow = r;
+                game->ghostBaseRow = r; // armazena posicao base dos fantasmas
                 game->ghostBaseCol = c;
 
                 game->ghostCount = 4;
-                game->ghosts = malloc(sizeof(Ghost) * game->ghostCount);
+                game->ghosts = malloc(sizeof(Ghost) * game->ghostCount); // aloca memoria para os fantasmas
                 if (!game->ghosts) {
                     game->ghostCount = 0;
                     ghostsSpawned = true; // evita repetição se alocação falhar
@@ -86,7 +86,7 @@ static void SpawnEntitiesFromMap(GameState *game) {
     }
 
     if (!pacmanFound) {
-        printf("AVISO: Pacman não encontrado no mapa, usando posição (1,1)\n");
+        printf("AVISO: Pacman não encontrado no mapa, usando posição (1,1)\n"); // caso não ache o pacman o jogo printa no terminal e spawna o pacman em 1,1
         InitPacman(&game->pacman, 1, 1);
     }
 }
@@ -98,20 +98,20 @@ bool InitGame(GameState *game, const char *mapFile) {
     SetTargetFPS(60);
 
     
-    strncpy(game->mapFile, mapFile, sizeof(game->mapFile));
-    game->mapFile[sizeof(game->mapFile)-1] = '\0';
+    strncpy(game->mapFile, mapFile, sizeof(game->mapFile)); // copia o nome do arquivo do mapa
+    game->mapFile[sizeof(game->mapFile)-1] = '\0'; // garante terminação nula
 
     game->map = malloc(sizeof(Map));
     if (!game->map) return false;
 
     if (!LoadMap(game->map, mapFile)) {
-        printf("Erro ao carregar o mapa: %s\n", mapFile);
+        printf("Erro ao carregar o mapa: %s\n", mapFile); // mensagem de erro se falhar
         return false;
     }
 
     // Inicialização da câmera
-    game->camera.target = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-    game->camera.offset = (Vector2){ 0.0f, 0.0f };
+    game->camera.target = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f }; // centraliza a câmera
+    game->camera.offset = (Vector2){ 0.0f, 0.0f }; 
     game->camera.rotation = 0.0f;
     game->camera.zoom = 1.0f;
 
@@ -195,7 +195,7 @@ void UpdateGame(GameState *game, float dt) {
             int ghostPrevRow[4] = {0};
             int ghostPrevCol[4] = {0};
 
-            PacmanEvent ev = UpdatePacman(&game->pacman, game->map, dt);
+            PacmanEvent ev = UpdatePacman(&game->pacman, game->map, dt); // atualiza Pacman
 
             if (ev == PACMAN_EVENT_PELLET) {
                 game->score += 10;
@@ -266,12 +266,12 @@ void UpdateGame(GameState *game, float dt) {
                     }
                     else {
                         game->pacman.lives--;
-                        game->score = (game->score >= 200) ? game->score - 200 : 0;
+                        game->score = (game->score >= 200) ? game->score - 200 : 0; // perde 200 pontos, mas não vai abaixo de 0
                         if (game->pacman.lives <= 0) {
                             game->currentScreen = GAME_OVER;
                         }
                         else {
-                            // Conseto do Erro apontado
+                            // Conserto do Erro apontado
                             game->pacman.pos.row = game->pacmanBaseRow;
                             game->pacman.pos.col = game->pacmanBaseCol;
                             game->pacman.pos.direction = DIR_RIGHT;
@@ -340,7 +340,7 @@ void UpdateGame(GameState *game, float dt) {
 
         case GAME_OVER:
             if (IsKeyPressed(KEY_ENTER)) {
-                /* Reinicia o nível atual */
+                // Reinicia o nível atual 
                 ResetLevel(game, game->mapFile);
                 game->currentScreen = MENU_MAIN;
             }
@@ -348,7 +348,7 @@ void UpdateGame(GameState *game, float dt) {
                 CloseWindow();
             }
             break;
-    } // switch
+    } 
 }
 
 // Renderiza o estado atual do jogo
@@ -367,7 +367,7 @@ void RenderGame(GameState *game) {
 
         case GAME_ACTIVE:
         case GAME_OVER: {
-            
+            // Desenha o mapa
             for (int r = 0; r < game->map->rows; r++) {
                 for (int c = 0; c < game->map->cols; c++) {
                     int x = c * BLOCK_SIZE;

@@ -50,8 +50,8 @@ typedef enum {
 } GhostMode;
 
 // Estrutura do fantasma
-// NOTE: 'speed' aqui é interpretado como tempo entre passos (segundos). 
-// Valores menores -> movimentos mais rápidos. */
+// 'speed' aqui é como o tempo entre passos (segundos). 
+// Valores menores -> movimentos mais rápidos. 
 typedef struct {
     Position pos;
     GhostMode mode;
